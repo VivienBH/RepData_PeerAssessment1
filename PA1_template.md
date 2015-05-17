@@ -85,13 +85,13 @@ Load necessary packages.
 
 
 ```r
-packages <- c("data.table", "xtable")
+packages <- c("data.table", "xtable", "plyr")
 sapply(packages, require, character.only=TRUE, quietly=TRUE)
 ```
 
 ```
-## data.table     xtable 
-##       TRUE       TRUE
+## data.table     xtable       plyr 
+##       TRUE       TRUE       TRUE
 ```
 
 
@@ -216,7 +216,7 @@ print(xtable(tab), type="html", include.rownames=FALSE)
 ```
 
 <!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
-<!-- Mon May 18 04:22:25 2015 -->
+<!-- Mon May 18 06:00:47 2015 -->
 <table border=1>
 <tr> <th> n </th> <th> nValid </th> <th> mean </th> <th> median </th>  </tr>
   <tr> <td align="right">  61 </td> <td align="right">  53 </td> <td align="right"> 10766.19 </td> <td align="right"> 10765 </td> </tr>
@@ -343,7 +343,7 @@ print(xtable(tab), type="html", include.rownames=FALSE)
 ```
 
 <!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
-<!-- Mon May 18 04:22:25 2015 -->
+<!-- Mon May 18 06:00:47 2015 -->
 <table border=1>
 <tr> <th> isStepsMissing </th> <th> N </th>  </tr>
   <tr> <td> FALSE </td> <td align="right"> 17568 </td> </tr>
@@ -407,7 +407,7 @@ print(xtable(tab), type="html", include.rownames=FALSE)
 ```
 
 <!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
-<!-- Mon May 18 04:22:26 2015 -->
+<!-- Mon May 18 06:00:47 2015 -->
 <table border=1>
 <tr> <th> n </th> <th> nValid </th> <th> mean </th> <th> median </th>  </tr>
   <tr> <td align="right">  61 </td> <td align="right">  61 </td> <td align="right"> 10766.19 </td> <td align="right"> 10766.19 </td> </tr>
@@ -415,4 +415,46 @@ print(xtable(tab), type="html", include.rownames=FALSE)
 
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+> ### Are there differences in activity patterns between weekdays and weekends?
+> 
+> For this part the `weekdays()` function may be of some help here. Use
+> the dataset with the filled-in missing values for this part.
+> 
+> 1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+> 
+> 1. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was creating using **simulated data**:
+> 
+> ![Sample panel plot](instructions_fig/sample_panelplot.png) 
+> 
+> **Your plot will look different from the one above** because you will
+> be using the activity monitor data. Note that the above plot was made
+> using the lattice system but you can make the same version of the plot
+> using any plotting system you choose.
+
+Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+Use this solution to [collapse the factor values](https://github.com/irongoldfish/reproducible/blob/master/PA1_template.Rmd) for day of week.
+
+
+```r
+## Set timezone
+## Sys.setlocale("LC_TIME", "en_US.UTF-8")
+
+##paindays= c("Monday","Tuesday","Wednesday","Thursday","Friday")
+paindays= c("星期一","星期二","星期三","星期四","星期五")
+
+fill_activity$weekday <- as.factor(ifelse(weekdays(fill_activity$date)%in%paindays,"weekday","weekend"))
+
+stepsperinterval.weekdaysplit<-ddply(fill_activity, c("interval","weekday"),summarise,
+                    meansteps = mean(steps,na.rm=TRUE)
+)
+dtweekday <- stepsperinterval.weekdaysplit[stepsperinterval.weekdaysplit$weekday == "weekday",]
+dtweekend <- stepsperinterval.weekdaysplit[stepsperinterval.weekdaysplit$weekday == "weekend",]
+
+par(mfrow = c(2, 1))
+plot(dtweekend$interval, dtweekend$meanSteps, xlab = "interval(5mins)",
+     ylab = "averaged across all days", type = "l")
+plot(dtweekday$interval, dtweekday$meanSteps, xlab = "interval(5mins)",
+     ylab = "averaged across all days", type = "l")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-18-1.png) 
